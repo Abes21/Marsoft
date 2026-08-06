@@ -1,0 +1,38 @@
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, sans-serif;
+  background: #f4f6f8;
+  color: #1f2933;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 12px 20px;
+  background: #102a43;
+  color: #fff;
+}
+
+.brand { font-weight: 700; }
+
+.nav a {
+  color: #d9e2ec;
+  text-decoration: none;
+  margin-right: 14px;
+}
+
+.nav a:hover { color: #fff; }
+
+.userbox {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.content {
+  padding: 24px;
+}

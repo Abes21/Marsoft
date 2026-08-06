@@ -37,7 +37,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.humanize',
+
+    # lokalne aplikacje
     'core',
+    'accounts',
 ]
 
 MIDDLEWARE = [
@@ -55,10 +59,11 @@ ROOT_URLCONF = 'config.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
@@ -121,3 +126,21 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Własny model użytkownika
+AUTH_USER_MODEL = 'accounts.User'
+
+# Logowanie / wylogowanie
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'dashboard'
+LOGOUT_REDIRECT_URL = 'login'
+
+# Strefa czasowa i język
+LANGUAGE_CODE = 'pl'
+TIME_ZONE = 'Europe/Warsaw'
+USE_I18N = True
+USE_TZ = True
+
+# Pliki statyczne
+STATIC_URL = 'static/'
+STATICFILES_DIRS = [BASE_DIR / 'static']
