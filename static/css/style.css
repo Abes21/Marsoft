@@ -205,3 +205,33 @@ body {
 .detail-list dd {
   margin: 0;
 }
+
+/* ===== Alerty ===== */
+.badge-status-new { background: #dbeafe; color: #1e40af; }
+.badge-status-in_progress { background: #fef3c7; color: #92400e; }
+.badge-status-resolved { background: #d1fae5; color: #065f46; }
+.badge-status-false_positive { background: #e2e8f0; color: #334155; }
+.badge-status-ignored { background: #f3f4f6; color: #6b7280; }
+
+.note-item {
+  border: 1px solid #d9e2ec;
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 12px;
+  background: #f9fafb;
+}
+
+.note-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.note-date {
+  color: #6b7280;
+}
+
+.note-content {
+  margin-top: 8px;
+}

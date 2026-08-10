@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Alerty{% endblock %}
+
+{% block content %}
+<h1>Alerty</h1>
+
+<form method="get" class="filters">
+  <select name="status">
+    <option value="">Wszystkie statusy</option>
+    {% for value, label in filter_form.status.field.choices %}
+      {% if value %}
+        <option value="{{ value }}" {% if filter_form.status.value == value %}selected{% endif %}>{{ label }}</option>
+      {% endif %}
+    {% endfor %}
+  </select>
+
+  <select name="severity">
+    <option value="">Wszystkie poziomy</option>
+    {% for value, label in filter_form.severity.field.choices %}
+      {% if value %}
+        <option value="{{ value }}" {% if filter_form.severity.value == value %}selected{% endif %}>{{ label }}</option>
+      {% endif %}
+    {% endfor %}
+  </select>
+
+  <select name="device">
+    <option value="">Wszystkie urządzenia</option>
+    {% for device in devices %}
+      <option value="{{ device.pk }}" {% if filter_form.device.value == device.pk|stringformat:"s" %}selected{% endif %}>{{ device.name }}</option>
+    {% endfor %}
+  </select>
+
+  <select name="rule">
+    <option value="">Wszystkie reguły</option>
+    {% for rule in rules %}
+      <option value="{{ rule.pk }}" {% if filter_form.rule.value == rule.pk|stringformat:"s" %}selected{% endif %}>{{ rule.name }}</option>
+    {% endfor %}
+  </select>
+
+  <label>Od <input type="date" name="date_from" value="{{ filter_form.date_from.value|default:'' }}"></label>
+  <label>Do <input type="date" name="date_to" value="{{ filter_form.date_to.value|default:'' }}"></label>
+
+  <button type="submit" class="btn">Filtruj</button>
+  <a class="btn btn-secondary" href="{% url 'alerts' %}">Wyczyść</a>
+</form>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>Data utworzenia</th>
+      <th>Nazwa</th>
+      <th>Poziom zagrożenia</th>
+      <th>Urządzenie</th>
+      <th>Status</th>
+      <th>Osoba odpowiedzialna</th>
+      <th>Akcje</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for alert in alerts %}
+      <tr>
+        <td>{{ alert.created_at|date:"d.m.Y H:i" }}</td>
+        <td>
+          <a href="{% url 'alert_detail' alert.pk %}">{{ alert.name }}</a>
+        </td>
+        <td>
+          <span class="badge badge-{{ alert.severity }}">{{ alert.get_severity_display }}</span>
+        </td>
+        <td>
+          {% if alert.device %}
+            <a href="{{ alert.device.get_absolute_url }}">{{ alert.device.name }}</a>
+          {% else %}-{% endif %}
+        </td>
+        <td>
+          <span class="badge badge-status-{{ alert.status }}">{{ alert.get_status_display }}</span>
+        </td>
+        <td>{{ alert.assigned_to.username|default:"-" }}</td>
+        <td>
+          <a href="{% url 'alert_detail' alert.pk %}">Szczegóły</a>
+        </td>
+      </tr>
+    {% empty %}
+      <tr>
+        <td colspan="7">Brak alertów spełniających kryteria.</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Reguły bezpieczeństwa{% endblock %}
+
+{% block content %}
+<h1>Reguły bezpieczeństwa</h1>
+
+<div class="message">
+  Reguły definiują warunki automatycznego tworzenia alertów na podstawie analizy logów i monitoringu.
+  Wersja demonstracyjna zawiera predefiniowane reguły.
+</div>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>Nazwa</th>
+      <th>Typ</th>
+      <th>Próg</th>
+      <th>Przedział czasowy</th>
+      <th>Poziom alertu</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for rule in rules %}
+      <tr>
+        <td>{{ rule.name }}</td>
+        <td>{{ rule.get_rule_type_display }}</td>
+        <td>{{ rule.threshold }}</td>
+        <td>{{ rule.time_window_minutes }} min</td>
+        <td>
+          <span class="badge badge-{{ rule.severity }}">{{ rule.get_severity_display }}</span>
+        </td>
+        <td>
+          {% if rule.is_active %}
+            <span class="badge badge-info">Aktywna</span>
+          {% else %}
+            <span class="badge badge-warning">Nieaktywna</span>
+          {% endif %}
+        </td>
+      </tr>
+    {% empty %}
+      <tr>
+        <td colspan="6">Brak zdefiniowanych reguł.</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

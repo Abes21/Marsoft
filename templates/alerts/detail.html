@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+
+{% block title %}Alert: {{ alert.name }}{% endblock %}
+
+{% block content %}
+<h1>{{ alert.name }}</h1>
+
+<div class="card">
+  <h2>Podstawowe informacje</h2>
+
+  <dl class="detail-list">
+    <dt>Data utworzenia</dt>
+    <dd>{{ alert.created_at|date:"d.m.Y H:i:s" }}</dd>
+
+    <dt>Data aktualizacji</dt>
+    <dd>{{ alert.updated_at|date:"d.m.Y H:i:s" }}</dd>
+
+    {% if alert.resolved_at %}
+      <dt>Data rozwiązania</dt>
+      <dd>{{ alert.resolved_at|date:"d.m.Y H:i:s" }}</dd>
+    {% endif %}
+
+    <dt>Poziom zagrożenia</dt>
+    <dd><span class="badge badge-{{ alert.severity }}">{{ alert.get_severity_display }}</span></dd>
+
+    <dt>Status</dt>
+    <dd><span class="badge badge-status-{{ alert.status }}">{{ alert.get_status_display }}</span></dd>
+
+    <dt>Reguła</dt>
+    <dd>{% if alert.rule %}{{ alert.rule.name }}{% else %}-{% endif %}</dd>
+
+    <dt>Urządzenie</dt>
+    <dd>
+      {% if alert.device %}
+        <a href="{{ alert.device.get_absolute_url }}">{{ alert.device.name }}</a>
+      {% else %}-{% endif %}
+    </dd>
+
+    <dt>Osoba odpowiedzialna</dt>
+    <dd>{{ alert.assigned_to.username|default:"Nieprzypisany" }}</dd>
+  </dl>
+</div>
+
+<div class="card">
+  <h2>Opis</h2>
+  <p>{{ alert.description|linebreaksbr|default:"Brak opisu." }}</p>
+</div>
+
+<div class="card">
+  <h2>Powiązane logi</h2>
+  {% if alert.related_logs.exists %}
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Czas</th>
+          <th>Poziom</th>
+          <th>Źródło</th>
+          <th>Treść</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for log in alert.related_logs.all %}
+          <tr>
+            <td>{{ log.event_time|date:"d.m.Y H:i:s" }}</td>
+            <td><span class="badge badge-{{ log.level }}">{{ log.get_level_display }}</span></td>
+            <td>{{ log.source }}</td>
+            <td><a href="{% url 'log_detail' log.pk %}">{{ log.message|truncatechars:60 }}</a></td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>Brak powiązanych logów.</p>
+  {% endif %}
+</div>
+
+<div class="card">
+  <h2>Zmień status i przypisz osobę</h2>
+
+  <form method="post">
+    {% csrf_token %}
+
+    <div class="form-field">
+      <label for="id_status">Status</label>
+      {{ status_form.status }}
+    </div>
+
+    <div class="form-field">
+      <label for="id_assigned_to">Osoba odpowiedzialna</label>
+      {{ status_form.assigned_to }}
+    </div>
+
+    <button type="submit" name="change_status" class="btn btn-primary">Zapisz zmiany</button>
+  </form>
+</div>
+
+<div class="card">
+  <h2>Dodaj notatkę</h2>
+
+  <form method="post">
+    {% csrf_token %}
+
+    <div class="form-field">
+      {{ note_form.content }}
+    </div>
+
+    <button type="submit" name="add_note" class="btn btn-primary">Dodaj notatkę</button>
+  </form>
+</div>
+
+<div class="card">
+  <h2>Notatki ({{ notes|length }})</h2>
+
+  {% for note in notes %}
+    <div class="note-item">
+      <div class="note-header">
+        <strong>{{ note.author.username }}</strong>
+        <span class="note-date">{{ note.created_at|date:"d.m.Y H:i:s" }}</span>
+      </div>
+      <div class="note-content">{{ note.content|linebreaksbr }}</div>
+    </div>
+  {% empty %}
+    <p>Brak notatek.</p>
+  {% endfor %}
+</div>
+
+<div class="card">
+  <h2>Historia obsługi</h2>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Data</th>
+        <th>Użytkownik</th>
+        <th>Rodzaj akcji</th>
+        <th>Opis</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for entry in history %}
+        <tr>
+          <td>{{ entry.created_at|date:"d.m.Y H:i:s" }}</td>
+          <td>{{ entry.user.username|default:"-" }}</td>
+          <td>{{ entry.get_action_type_display }}</td>
+          <td>{{ entry.description }}</td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="4">Brak historii.</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<a class="btn btn-secondary" href="{% url 'alerts' %}">Wróć do listy alertów</a>
+{% endblock %}

@@ -43,6 +43,8 @@ INSTALLED_APPS = [
     'core',
     'accounts',
     'devices',
+    'logs',
+    'alerts',
 ]
 
 MIDDLEWARE = [
