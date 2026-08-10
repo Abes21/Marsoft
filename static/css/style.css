@@ -235,3 +235,75 @@ body {
 .note-content {
   margin-top: 8px;
 }
+
+/* ===== Dashboard ===== */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.stat-card {
+  background: #fff;
+  border: 1px solid #d9e2ec;
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.stat-value {
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.stat-ok { color: #047857; }
+.stat-bad { color: #b91c1c; }
+.stat-warn { color: #b45309; }
+
+.stat-label {
+  color: #52606d;
+  font-size: 14px;
+}
+
+.dashboard-columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+  gap: 20px;
+}
+
+.chart {
+  display: flex;
+  gap: 12px;
+  padding: 10px 0 0;
+}
+
+.chart-col {
+  flex: 1;
+  height: 190px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 4px;
+}
+
+.chart-bar {
+  width: 100%;
+  max-width: 48px;
+  min-height: 2px;
+  background: #2563eb;
+  border-radius: 4px 4px 0 0;
+}
+
+.chart-value {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.chart-label {
+  font-size: 12px;
+  color: #64748b;
+}
