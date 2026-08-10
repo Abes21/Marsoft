@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<h1>{{ title }}</h1>
+
+<form method="post" class="form">
+  {% csrf_token %}
+
+  {% if form.non_field_errors %}
+    <div class="message error">
+      {{ form.non_field_errors|striptags }}
+    </div>
+  {% endif %}
+
+  <div class="form-grid">
+    {% for field in form %}
+      <div class="form-field">
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+
+        {% if field.help_text %}
+          <small class="help-text">{{ field.help_text }}</small>
+        {% endif %}
+
+        {% if field.errors %}
+          <div class="field-error">
+            {{ field.errors|striptags }}
+          </div>
+        {% endif %}
+      </div>
+    {% endfor %}
+  </div>
+
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">Zapisz</button>
+
+    {% if device %}
+      <a class="btn btn-secondary" href="{{ device.get_absolute_url }}">Anuluj</a>
+    {% else %}
+      <a class="btn btn-secondary" href="{% url 'devices' %}">Anuluj</a>
+    {% endif %}
+  </div>
+</form>
+{% endblock %}

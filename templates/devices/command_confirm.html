@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}{{ command_label }}{% endblock %}
+
+{% block content %}
+<h1>{{ command_label }}: {{ device.name }}</h1>
+
+{% if is_disconnect and device.is_critical %}
+  <div class="message error">
+    Uwaga: to urządzenie jest oznaczone jako <strong>krytyczne</strong>
+    dla działania firmy. Odłączenie może zaburzyć pracę organizacji.
+  </div>
+{% endif %}
+
+<div class="card">
+  <p>Urządzenie: <strong>{{ device.name }}</strong> ({{ device.ip_address|default:"-" }})</p>
+  <p>Aktualny status dostępu do sieci: <strong>{{ device.get_network_access_status_display }}</strong></p>
+  <p class="field-error">
+    Operacja wymaga potwierdzenia i uzasadnienia.
+    Zostanie zapisana w historii poleceń administracyjnych.
+  </p>
+
+  <form method="post">
+    {% csrf_token %}
+
+    <div class="form-field">
+      <label for="{{ form.justification.id_for_label }}">{{ form.justification.label }}</label>
+      {{ form.justification }}
+
+      {% if form.justification.errors %}
+        <div class="field-error">{{ form.justification.errors|striptags }}</div>
+      {% endif %}
+    </div>
+
+    <div class="form-actions">
+      {% if is_disconnect %}
+        <button type="submit" class="btn btn-danger">Potwierdź odłączenie</button>
+      {% else %}
+        <button type="submit" class="btn btn-primary">Potwierdź przyłączenie</button>
+      {% endif %}
+      <a class="btn btn-secondary" href="{{ device.get_absolute_url }}">Anuluj</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

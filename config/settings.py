@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     # lokalne aplikacje
     'core',
     'accounts',
+    'devices',
 ]
 
 MIDDLEWARE = [
@@ -144,3 +145,7 @@ USE_TZ = True
 # Pliki statyczne
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
+
+# Demonstracyjny mechanizm wykonawczy poleceń administracyjnych.
+# Wartość od 0.0 do 1.0 określa prawdopodobieństwo symulowanego niepowodzenia.
+COMMAND_FAILURE_RATE = 0.0

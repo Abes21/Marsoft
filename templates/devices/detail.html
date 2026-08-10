@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+
+{% block title %}{{ device.name }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>
+    {{ device.name }}
+    {% if device.is_critical %}
+      <span class="badge badge-critical">urządzenie krytyczne</span>
+    {% endif %}
+    {% if device.disconnect_blocked %}
+      <span class="badge">chronione</span>
+    {% endif %}
+  </h1>
+
+  {% if user.is_admin_role %}
+    <div>
+      <a class="btn" href="{% url 'device_edit' device.pk %}">Edytuj</a>
+      <a class="btn btn-danger" href="{% url 'device_delete' device.pk %}">Usuń</a>
+    </div>
+  {% endif %}
+</div>
+
+{% if user.is_admin_role %}
+  <div class="card">
+    <h2>Polecenia administracyjne</h2>
+
+    {% if device.disconnect_blocked %}
+      <p>Urządzenie chronione - nie może zostać odłączone od sieci.</p>
+    {% else %}
+      {% if device.network_access_status == 'connected' or device.network_access_status == 'command_error' %}
+        <a class="btn btn-danger" href="{% url 'device_disconnect' device.pk %}">Odłącz od sieci</a>
+      {% endif %}
+
+      {% if device.network_access_status == 'disconnected_admin' or device.network_access_status == 'command_error' %}
+        <a class="btn btn-primary" href="{% url 'device_connect' device.pk %}">Przyłącz do sieci</a>
+      {% endif %}
+
+      {% if device.network_access_status == 'pending_disconnect' or device.network_access_status == 'pending_connect' %}
+        <p>Oczekuje na wykonanie polecenia.</p>
+      {% endif %}
+    {% endif %}
+  </div>
+{% endif %}
+
+<div class="card">
+  <h2>Dane urządzenia</h2>
+
+  <dl class="detail-list">
+    <dt>Nazwa</dt>
+    <dd>{{ device.name }}</dd>
+
+    <dt>Typ urządzenia</dt>
+    <dd>{{ device.get_device_type_display }}</dd>
+
+    <dt>Adres IP</dt>
+    <dd>{{ device.ip_address|default:"-" }}</dd>
+
+    <dt>Adres MAC</dt>
+    <dd>{{ device.mac_address|default:"-" }}</dd>
+
+    <dt>System operacyjny</dt>
+    <dd>{{ device.operating_system|default:"-" }}</dd>
+
+    <dt>Użytkownik / właściciel</dt>
+    <dd>{{ device.assigned_user|default:"-" }}</dd>
+
+    <dt>Dział</dt>
+    <dd>{{ device.department|default:"-" }}</dd>
+
+    <dt>Lokalizacja</dt>
+    <dd>{{ device.location|default:"-" }}</dd>
+
+    <dt>Poziom ważności</dt>
+    <dd>{{ device.get_importance_display }}</dd>
+
+    <dt>Status monitoringu</dt>
+    <dd>{{ device.get_monitoring_status_display }}</dd>
+
+    <dt>Status dostępu do sieci</dt>
+    <dd>{{ device.get_network_access_status_display }}</dd>
+
+    <dt>Monitoring włączony</dt>
+    <dd>{{ device.monitoring_enabled|yesno:"Tak,Nie" }}</dd>
+
+    <dt>Data ostatniego sprawdzenia</dt>
+    <dd>{{ device.last_checked_at|date:"d.m.Y H:i:s"|default:"-" }}</dd>
+
+    <dt>Data ostatniego polecenia administracyjnego</dt>
+    <dd>{{ device.last_admin_command_at|date:"d.m.Y H:i:s"|default:"-" }}</dd>
+
+    <dt>Uwagi</dt>
+    <dd>{{ device.notes|default:"-"|linebreaksbr }}</dd>
+  </dl>
+</div>
+
+<div class="card">
+  <h2>Historia dostępności</h2>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Data sprawdzenia</th>
+        <th>Wynik</th>
+        <th>Czas odpowiedzi</th>
+        <th>Komunikat błędu</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for result in device.monitoring_results.all|slice:":20" %}
+        <tr>
+          <td>{{ result.checked_at|date:"d.m.Y H:i:s" }}</td>
+          <td>{% if result.is_available %}online{% else %}offline{% endif %}</td>
+          <td>{% if result.response_time_ms is not None %}{{ result.response_time_ms }} ms{% else %}-{% endif %}</td>
+          <td>{{ result.error_message|default:"-" }}</td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="4">Brak wyników monitoringu. Monitoring zostanie dodany w kolejnym kroku.</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="card">
+  <h2>Historia poleceń administracyjnych</h2>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Data zlecenia</th>
+        <th>Polecenie</th>
+        <th>Administrator</th>
+        <th>Uzasadnienie</th>
+        <th>Status</th>
+        <th>Data zakończenia</th>
+        <th>Wynik / błąd</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for command in device.admin_commands.all %}
+        <tr>
+          <td>{{ command.requested_at|date:"d.m.Y H:i:s" }}</td>
+          <td>{{ command.get_command_type_display }}</td>
+          <td>{{ command.administrator.username }}</td>
+          <td>{{ command.justification }}</td>
+          <td>{{ command.get_status_display }}</td>
+          <td>{{ command.finished_at|date:"d.m.Y H:i:s"|default:"-" }}</td>
+          <td>{{ command.error_message|default:command.result_message|default:"-" }}</td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="7">Brak poleceń administracyjnych.</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="card">
+  <h2>Ostatnie logi</h2>
+  <p>Logi urządzenia zostaną dodane w kolejnym kroku.</p>
+</div>
+
+<div class="card">
+  <h2>Powiązane alerty</h2>
+  <p>Alerty zostaną dodane w kolejnym kroku.</p>
+</div>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Usuń urządzenie{% endblock %}
+
+{% block content %}
+<h1>Usuń urządzenie</h1>
+
+<div class="card">
+  <p>
+    Czy na pewno chcesz usunąć urządzenie
+    <strong>{{ device.name }}</strong>?
+  </p>
+
+  <p class="field-error">
+    Operacja jest nieodwracalna.
+  </p>
+
+  <form method="post">
+    {% csrf_token %}
+
+    <button type="submit" class="btn btn-danger">Usuń</button>
+    <a class="btn btn-secondary" href="{{ device.get_absolute_url }}">Anuluj</a>
+  </form>
+</div>
+{% endblock %}

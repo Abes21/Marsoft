@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}Urządzenia{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>Urządzenia</h1>
+
+  {% if user.is_admin_role %}
+    <a class="btn btn-primary" href="{% url 'device_add' %}">Dodaj urządzenie</a>
+  {% endif %}
+</div>
+
+<form method="get" class="filters">
+  <input
+    type="text"
+    name="q"
+    value="{{ q }}"
+    placeholder="Szukaj: nazwa, IP, użytkownik, dział"
+  >
+
+  <select name="device_type">
+    <option value="">Typ: wszystkie</option>
+    {% for value, label in device_types %}
+      <option value="{{ value }}" {% if filters.device_type == value %}selected{% endif %}>
+        {{ label }}
+      </option>
+    {% endfor %}
+  </select>
+
+  <select name="monitoring_status">
+    <option value="">Monitoring: wszystkie</option>
+    {% for value, label in monitoring_statuses %}
+      <option value="{{ value }}" {% if filters.monitoring_status == value %}selected{% endif %}>
+        {{ label }}
+      </option>
+    {% endfor %}
+  </select>
+
+  <select name="network_access_status">
+    <option value="">Dostęp do sieci: wszystkie</option>
+    {% for value, label in network_access_statuses %}
+      <option value="{{ value }}" {% if filters.network_access_status == value %}selected{% endif %}>
+        {{ label }}
+      </option>
+    {% endfor %}
+  </select>
+
+  <select name="operating_system">
+    <option value="">System: wszystkie</option>
+    {% for os in operating_systems %}
+      <option value="{{ os }}" {% if filters.operating_system == os %}selected{% endif %}>
+        {{ os }}
+      </option>
+    {% endfor %}
+  </select>
+
+  <select name="department">
+    <option value="">Dział: wszystkie</option>
+    {% for department in departments %}
+      <option value="{{ department }}" {% if filters.department == department %}selected{% endif %}>
+        {{ department }}
+      </option>
+    {% endfor %}
+  </select>
+
+  <select name="importance">
+    <option value="">Ważność: wszystkie</option>
+    {% for value, label in importances %}
+      <option value="{{ value }}" {% if filters.importance == value %}selected{% endif %}>
+        {{ label }}
+      </option>
+    {% endfor %}
+  </select>
+
+  <button type="submit" class="btn">Filtruj</button>
+  <a class="btn btn-secondary" href="{% url 'devices' %}">Wyczyść</a>
+</form>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>Nazwa</th>
+      <th>Typ</th>
+      <th>Adres IP</th>
+      <th>System operacyjny</th>
+      <th>Użytkownik / dział</th>
+      <th>Status monitoringu</th>
+      <th>Status dostępu do sieci</th>
+      <th>Ostatnie sprawdzenie</th>
+      {% if user.is_admin_role %}
+        <th>Akcje</th>
+      {% endif %}
+    </tr>
+  </thead>
+
+  <tbody>
+    {% for device in devices %}
+      <tr>
+        <td>
+          <a href="{{ device.get_absolute_url }}">{{ device.name }}</a>
+          {% if device.is_critical %}
+            <span class="badge badge-critical">krytyczne</span>
+          {% endif %}
+        </td>
+        <td>{{ device.get_device_type_display }}</td>
+        <td>{{ device.ip_address|default:"-" }}</td>
+        <td>{{ device.operating_system|default:"-" }}</td>
+        <td>
+          {{ device.assigned_user|default:"-" }}
+          {% if device.department %}
+            / {{ device.department }}
+          {% endif %}
+        </td>
+        <td>{{ device.get_monitoring_status_display }}</td>
+        <td>{{ device.get_network_access_status_display }}</td>
+        <td>{{ device.last_checked_at|date:"d.m.Y H:i"|default:"-" }}</td>
+
+        {% if user.is_admin_role %}
+          <td>
+            <a href="{% url 'device_edit' device.pk %}">Edytuj</a>
+            |
+            <a href="{% url 'device_delete' device.pk %}">Usuń</a>
+          </td>
+        {% endif %}
+      </tr>
+    {% empty %}
+      <tr>
+        <td colspan="9">
+          Brak urządzeń spełniających wybrane kryteria.
+        </td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block title %}Brak uprawnień{% endblock %}
+
+{% block content %}
+<h1>Brak uprawnień</h1>
+<p>Nie masz uprawnień do wykonania tej operacji.</p>
+<a class="btn" href="{% url 'dashboard' %}">Wróć do dashboardu</a>
+{% endblock %}
