@@ -48,3 +48,46 @@ def execute_admin_command(command):
         device.save()
 
     return command
+
+
+import subprocess
+import xml.etree.ElementTree as ET
+
+
+def run_nmap_discovery(subnet, timeout=60):
+    """Wykrywa aktywne hosty w podsieci za pomocą nmap -sn."""
+
+    result = subprocess.run(
+        ["nmap", "-sn", subnet, "-oX", "-"],
+        capture_output=True,
+        text=True,
+        timeout=timeout,
+    )
+
+    root = ET.fromstring(result.stdout)
+    hosts = []
+
+    for host in root.findall("host"):
+        status = host.find("status")
+        if status is None or status.get("state") != "up":
+            continue
+
+        address = None
+        for addr in host.findall("address"):
+            if addr.get("addrtype") == "ipv4":
+                address = addr.get("addr")
+                break
+
+        if not address:
+            continue
+
+        hostname = ""
+        hostnames = host.find("hostnames")
+        if hostnames is not None:
+            first = hostnames.find("hostname")
+            if first is not None:
+                hostname = first.get("name", "")
+
+        hosts.append({"ip": address, "hostname": hostname})
+
+    return hosts

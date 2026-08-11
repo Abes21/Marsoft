@@ -190,3 +190,38 @@ class AdminCommand(models.Model):
 
     def __str__(self):
         return f"{self.get_command_type_display()} - {self.device.name}"
+
+
+class NetworkScan(models.Model):
+    """Historia skanowań sieci wykonanych przez administratora."""
+
+    class ScanStatus(models.TextChoices):
+        RUNNING = "running", "W trakcie"
+        DONE = "done", "Zakończone"
+        FAILED = "failed", "Niepowodzenie"
+
+    subnet = models.CharField("podsieć", max_length=64)
+    administrator = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="network_scans",
+        verbose_name="administrator",
+    )
+    started_at = models.DateTimeField("data rozpoczęcia", auto_now_add=True)
+    finished_at = models.DateTimeField("data zakończenia", blank=True, null=True)
+    status = models.CharField(
+        "status",
+        max_length=20,
+        choices=ScanStatus.choices,
+        default=ScanStatus.RUNNING,
+    )
+    hosts_found = models.JSONField("wykryte hosty", default=list, blank=True)
+    error_message = models.TextField("komunikat błędu", blank=True)
+
+    class Meta:
+        verbose_name = "Skanowanie sieci"
+        verbose_name_plural = "Skanowania sieci"
+        ordering = ["-started_at"]
+
+    def __str__(self):
+        return self.subnet

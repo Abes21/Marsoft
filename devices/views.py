@@ -246,3 +246,144 @@ def device_connect(request, pk):
             "is_disconnect": False,
         },
     )
+
+
+import ipaddress
+import logging
+import subprocess
+
+from django.conf import settings
+from django.utils import timezone
+
+from .models import NetworkScan
+from .services import run_nmap_discovery
+
+logger = logging.getLogger(__name__)
+
+
+def validate_subnet(value):
+    """Walidacja podsieci CIDR po stronie serwera (RNF-10)."""
+
+    try:
+        network = ipaddress.ip_network(value, strict=False)
+    except ValueError:
+        return None
+
+    if network.version != 4:
+        return None
+
+    if network.num_addresses > 256:
+        return None
+
+    return network
+
+
+@admin_required
+def device_scan(request):
+    """Wykrywanie urządzeń w sieci - tylko administrator."""
+
+    error = None
+    detected = []
+    subnet_value = (
+        request.POST.get("subnet", "").strip() if request.method == "POST" else ""
+    )
+
+    if request.method == "POST":
+        network = validate_subnet(subnet_value)
+
+        if network is None:
+            error = (
+                "Podaj poprawną podsieć w formacie CIDR, np. 192.168.1.0/24 "
+                "(maksymalnie 256 adresów)."
+            )
+        else:
+            scan = NetworkScan.objects.create(
+                subnet=str(network),
+                administrator=request.user,
+            )
+
+            try:
+                timeout = getattr(settings, "NETWORK_SCAN_TIMEOUT_SECONDS", 60)
+                hosts = run_nmap_discovery(str(network), timeout=timeout)
+                scan.status = NetworkScan.ScanStatus.DONE
+                scan.hosts_found = hosts
+            except FileNotFoundError:
+                logger.exception("Brak zainstalowanego nmap.")
+                scan.status = NetworkScan.ScanStatus.FAILED
+                scan.error_message = "Brak narzędzia nmap na serwerze."
+                error = "Brak zainstalowanego narzędzia nmap."
+            except subprocess.TimeoutExpired:
+                logger.exception("Przekroczono czas skanowania.")
+                scan.status = NetworkScan.ScanStatus.FAILED
+                scan.error_message = "Przekroczono limit czasu skanowania."
+                error = "Skanowanie przekroczyło limit czasu."
+            except Exception:
+                logger.exception("Błąd skanowania sieci.")
+                scan.status = NetworkScan.ScanStatus.FAILED
+                scan.error_message = "Nie udało się zakończyć skanowania."
+                error = "Nie udało się zakończyć skanowania."
+
+            scan.finished_at = timezone.now()
+            scan.save()
+
+            if scan.status == NetworkScan.ScanStatus.DONE:
+                existing_ips = set(
+                    Device.objects.exclude(ip_address=None).values_list(
+                        "ip_address", flat=True
+                    )
+                )
+                detected = [
+                    {
+                        "ip": host["ip"],
+                        "hostname": host["hostname"],
+                        "exists": host["ip"] in existing_ips,
+                    }
+                    for host in scan.hosts_found
+                ]
+
+                if not detected:
+                    error = "Nie wykryto żadnych aktywnych hostów w podanej podsieci."
+
+    context = {
+        "error": error,
+        "detected": detected,
+        "subnet": subnet_value,
+        "scans": NetworkScan.objects.all()[:10],
+    }
+    return render(request, "devices/scan.html", context)
+
+
+@admin_required
+def device_scan_add(request):
+    """Dodanie zaznaczonych wykrytych hostów do rejestru."""
+
+    if request.method != "POST":
+        return redirect("device_scan")
+
+    added = 0
+    skipped = 0
+
+    for ip in request.POST.getlist("add_ips"):
+        try:
+            ipaddress.ip_address(ip)
+        except ValueError:
+            continue
+
+        if Device.objects.filter(ip_address=ip).exists():
+            skipped += 1
+            continue
+
+        Device.objects.create(
+            name=f"NET-{ip}",
+            ip_address=ip,
+            device_type=Device.DeviceType.OTHER,
+            monitoring_status=Device.MonitoringStatus.UNKNOWN,
+            notes="Urządzenie wykryte skanem sieci (nmap).",
+        )
+        added += 1
+
+    messages.success(
+        request,
+        f"Dodano {added} urządzeń do rejestru. Pominięto {skipped} już istniejących.",
+    )
+    return redirect("device_scan")

@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}Skanowanie sieci{% endblock %}
+
+{% block content %}
+<h1>Skanowanie sieci (wykrywanie urządzeń)</h1>
+
+<div class="message">
+  Funkcja pomocnicza: wykrywa aktywne hosty w podsieci za pomocą nmap.
+  Skanuj wyłącznie sieci, którymi administrujesz.
+  Wykryte urządzenia <strong>nie są dodawane automatycznie</strong> -
+  to Ty zaznaczasz, które trafią do rejestru.
+</div>
+
+<div class="card">
+  <h2>Nowe skanowanie</h2>
+
+  <form method="post">
+    {% csrf_token %}
+
+    <div class="form-field">
+      <label for="subnet">Podsieć (CIDR)</label>
+      <input type="text" id="subnet" name="subnet"
+             value="{{ subnet|default:'192.168.1.0/24' }}">
+      <small class="help-text">
+        Przykład: 192.168.1.0/24 - maksymalnie 256 adresów.
+      </small>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Skanuj</button>
+  </form>
+
+  {% if error %}
+    <div class="message error">{{ error }}</div>
+  {% endif %}
+</div>
+
+{% if detected %}
+  <div class="card">
+    <h2>Wykryte hosty ({{ detected|length }})</h2>
+
+    <form method="post" action="{% url 'device_scan_add' %}">
+      {% csrf_token %}
+
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Dodaj</th>
+            <th>Adres IP</th>
+            <th>Nazwa hosta</th>
+            <th>Status w rejestrze</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for host in detected %}
+            <tr>
+              <td>
+                {% if not host.exists %}
+                  <input type="checkbox" name="add_ips" value="{{ host.ip }}" checked>
+                {% endif %}
+              </td>
+              <td>{{ host.ip }}</td>
+              <td>{{ host.hostname|default:"-" }}</td>
+              <td>{% if host.exists %}już w rejestrze{% else %}nowe{% endif %}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <button type="submit" class="btn btn-primary">
+        Dodaj zaznaczone do rejestru
+      </button>
+    </form>
+  </div>
+{% endif %}
+
+<div class="card">
+  <h2>Historia skanowań</h2>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Data</th>
+        <th>Podsieć</th>
+        <th>Administrator</th>
+        <th>Status</th>
+        <th>Liczba hostów</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for scan in scans %}
+        <tr>
+          <td>{{ scan.started_at|date:"d.m.Y H:i:s" }}</td>
+          <td>{{ scan.subnet }}</td>
+          <td>{{ scan.administrator.username }}</td>
+          <td>{{ scan.get_status_display }}</td>
+          <td>{{ scan.hosts_found|length }}</td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="5">Brak skanowań.</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

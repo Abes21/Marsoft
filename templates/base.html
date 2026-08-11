@@ -5,15 +5,20 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}Panel monitorowania IT{% endblock %}</title>
+  <script src="{% static 'js/theme.js' %}"></script>
   <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body>
   <header class="topbar">
     <div class="brand">Panel monitorowania IT</div>
+
     <nav class="nav">
       {% if user.is_authenticated %}
         <a href="{% url 'dashboard' %}">Dashboard</a>
         <a href="{% url 'devices' %}">Urządzenia</a>
+        {% if user.is_admin_role %}
+          <a href="{% url 'device_scan' %}">Skanuj sieć</a>
+        {% endif %}
         <a href="{% url 'logs' %}">Logi</a>
         <a href="{% url 'alerts' %}">Alerty</a>
         {% if user.is_admin_role %}
@@ -22,8 +27,14 @@
         {% endif %}
       {% endif %}
     </nav>
+
     <div class="userbox">
       {% if user.is_authenticated %}
+        <select id="theme-select" aria-label="Motyw wyglądu">
+          <option value="light">Jasny</option>
+          <option value="dark">Ciemny</option>
+          <option value="system">Systemowy</option>
+        </select>
         <span>{{ user.username }} ({{ user.get_role_display }})</span>
         <form method="post" action="{% url 'logout' %}" style="display:inline;">
           {% csrf_token %}
@@ -34,13 +45,13 @@
   </header>
 
   <main class="content">
-  {% if messages %}
-    <div class="messages">
-      {% for message in messages %}
-        <div class="message {{ message.tags }}">{{ message }}</div>
-      {% endfor %}
-    </div>
-  {% endif %}
+    {% if messages %}
+      <div class="messages">
+        {% for message in messages %}
+          <div class="message {{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
 
     {% block content %}{% endblock %}
   </main>
