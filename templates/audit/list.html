@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}Historia działań{% endblock %}
+
+{% block content %}
+<h1>Historia działań użytkowników</h1>
+
+<div class="message">
+  Rejestr jest tylko do odczytu - wpisów nie można edytować ani usuwać (RF-82).
+</div>
+
+<form method="get" class="filters">
+  <select name="action_type">
+    <option value="">Rodzaj: wszystkie</option>
+    {% for value, label in action_types %}
+      <option value="{{ value }}" {% if filters.action_type == value %}selected{% endif %}>{{ label }}</option>
+    {% endfor %}
+  </select>
+
+  <input type="text" name="username" value="{{ filters.username }}" placeholder="Użytkownik">
+
+  <label>Od <input type="date" name="date_from" value="{{ filters.date_from }}"></label>
+  <label>Do <input type="date" name="date_to" value="{{ filters.date_to }}"></label>
+
+  <button type="submit" class="btn">Filtruj</button>
+  <a class="btn btn-secondary" href="{% url 'audit' %}">Wyczyść</a>
+</form>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>Data</th>
+      <th>Użytkownik</th>
+      <th>Adres IP</th>
+      <th>Rodzaj operacji</th>
+      <th>Opis</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for entry in page_obj %}
+      <tr>
+        <td>{{ entry.created_at|date:"d.m.Y H:i:s" }}</td>
+        <td>{{ entry.username|default:"-" }}</td>
+        <td>{{ entry.ip_address|default:"-" }}</td>
+        <td>{{ entry.get_action_type_display }}</td>
+        <td>{{ entry.description }}</td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="5">Brak wpisów spełniających kryteria.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<div class="pagination">
+  {% if page_obj.has_previous %}
+    <a class="btn" href="?{{ base_qs }}&page={{ page_obj.previous_page_number }}">Poprzednia</a>
+  {% endif %}
+
+  <span>Strona {{ page_obj.number }} z {{ page_obj.paginator.num_pages }} ({{ page_obj.paginator.count }} wpisów)</span>
+
+  {% if page_obj.has_next %}
+    <a class="btn" href="?{{ base_qs }}&page={{ page_obj.next_page_number }}">Następna</a>
+  {% endif %}
+</div>
+{% endblock %}

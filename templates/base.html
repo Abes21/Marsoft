@@ -29,6 +29,7 @@
         </a>
         {% if user.is_admin_role %}
           <a href="{% url 'rules' %}">Reguły</a>
+          <a href="{% url 'audit' %}">Działania</a>
           <a href="{% url 'settings' %}">Ustawienia</a>
         {% endif %}
       {% endif %}
