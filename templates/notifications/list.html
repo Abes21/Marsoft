@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Powiadomienia{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>Powiadomienia ({{ notifications|length }})</h1>
+  
+  {% if unread_count > 0 %}
+    <form method="post" action="{% url 'notifications_read_all' %}" style="display:inline;">
+      {% csrf_token %}
+      <button type="submit" class="btn">Oznacz wszystkie jako przeczytane</button>
+    </form>
+  {% endif %}
+</div>
+
+<div class="card">
+  {% for notification in notifications %}
+    <div class="notification-item {% if not notification.is_read %}unread{% endif %}">
+      <div class="notification-header">
+        <strong>{{ notification.message }}</strong>
+        <span class="notification-date">{{ notification.created_at|date:"d.m.Y H:i:s" }}</span>
+      </div>
+      
+      <div class="notification-actions">
+        {% if notification.alert %}
+          <a href="{% url 'alert_detail' notification.alert.pk %}" class="btn btn-primary">
+            Zobacz alert
+          </a>
+        {% endif %}
+        
+        {% if not notification.is_read %}
+          <form method="post" action="{% url 'notification_read' notification.pk %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-secondary">Oznacz jako przeczytane</button>
+          </form>
+        {% else %}
+          <span class="badge badge-info">Przeczytane</span>
+        {% endif %}
+      </div>
+    </div>
+  {% empty %}
+    <p>Brak powiadomień.</p>
+  {% endfor %}
+</div>
+{% endblock %}

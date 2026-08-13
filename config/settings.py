@@ -1,3 +1,5 @@
+import os
+from dotenv import load_dotenv
 """
 Django settings for config project.
 
@@ -14,6 +16,8 @@ from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+load_dotenv(BASE_DIR / '.env')
 
 
 # Quick-start development settings - unsuitable for production
@@ -45,6 +49,7 @@ INSTALLED_APPS = [
     'devices',
     'logs',
     'alerts',
+    'notifications',
 ]
 
 MIDDLEWARE = [
@@ -70,6 +75,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'notifications.context_processors.unread_notifications',
             ],
         },
     },
@@ -151,3 +157,4 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
 # Demonstracyjny mechanizm wykonawczy poleceń administracyjnych.
 # Wartość od 0.0 do 1.0 określa prawdopodobieństwo symulowanego niepowodzenia.
 COMMAND_FAILURE_RATE = 0.0
+API_LOGS_KEY = os.environ.get("API_LOGS_KEY", "")

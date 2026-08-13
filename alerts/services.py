@@ -6,6 +6,8 @@ from devices.models import Device
 from logs.models import LogEntry
 
 from .models import Alert, AlertHistory, SecurityRule
+from notifications.models import Notification
+from accounts.models import User
 
 
 def analyze_log_entry(log_entry):
@@ -143,4 +145,20 @@ def create_alert_if_not_duplicate(rule, name, description, device=None, related_
         description=f"Alert utworzony automatycznie przez regułę: {rule.name}",
     )
 
+    # Utwórz powiadomienia dla administratorów (RF-71)
+    create_notifications_for_alert(alert)
     return alert
+
+
+
+def create_notifications_for_alert(alert):
+    """Tworzy powiadomienia dla wszystkich administratorów o nowym alercie."""
+    
+    admins = User.objects.filter(role=User.Role.ADMIN)
+    
+    for admin in admins:
+        Notification.objects.create(
+            user=admin,
+            alert=alert,
+            message=f"Nowy alert {alert.get_severity_display()}: {alert.name}",
+        )

@@ -21,6 +21,12 @@
         {% endif %}
         <a href="{% url 'logs' %}">Logi</a>
         <a href="{% url 'alerts' %}">Alerty</a>
+        <a href="{% url 'notifications' %}">
+          Powiadomienia
+          {% if unread_notifications_count > 0 %}
+            <span class="badge badge-danger">{{ unread_notifications_count }}</span>
+          {% endif %}
+        </a>
         {% if user.is_admin_role %}
           <a href="{% url 'rules' %}">Reguły</a>
           <a href="{% url 'settings' %}">Ustawienia</a>
