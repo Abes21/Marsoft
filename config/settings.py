@@ -62,6 +62,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     "core.middleware.CurrentRequestMiddleware",
     "core.middleware.LoginRateLimitMiddleware",
+    "core.middleware.SessionTimeoutMiddleware",
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -162,3 +163,4 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
 # Wartość od 0.0 do 1.0 określa prawdopodobieństwo symulowanego niepowodzenia.
 COMMAND_FAILURE_RATE = 0.0
 API_LOGS_KEY = os.environ.get("API_LOGS_KEY", "")
+SESSION_IDLE_TIMEOUT_SECONDS = int(os.environ.get("SESSION_IDLE_TIMEOUT_SECONDS", "1800"))

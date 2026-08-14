@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Konta użytkowników{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>Konta użytkowników</h1>
+  <a class="btn btn-primary" href="{% url 'user_add' %}">Dodaj użytkownika</a>
+</div>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>Login</th>
+      <th>Imię i nazwisko</th>
+      <th>E-mail</th>
+      <th>Rola</th>
+      <th>Status</th>
+      <th>Ostatnie logowanie</th>
+      <th>Akcje</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for u in users %}
+      <tr>
+        <td>{{ u.username }}</td>
+        <td>{{ u.get_full_name|default:"-" }}</td>
+        <td>{{ u.email|default:"-" }}</td>
+        <td>{{ u.get_role_display }}</td>
+        <td>
+          {% if u.is_active %}
+            <span class="badge badge-status-resolved">Aktywne</span>
+          {% else %}
+            <span class="badge badge-error">Zablokowane</span>
+          {% endif %}
+        </td>
+        <td>{{ u.last_login|date:"d.m.Y H:i"|default:"nigdy" }}</td>
+        <td>
+          <a class="btn" href="{% url 'user_edit' u.pk %}">Edytuj</a>
+          <a class="btn" href="{% url 'user_set_password' u.pk %}">Hasło</a>
+
+          <form method="post" action="{% url 'user_toggle' u.pk %}" style="display:inline;">
+            {% csrf_token %}
+            {% if u.is_active %}
+              <button type="submit" class="btn btn-danger">Zablokuj</button>
+            {% else %}
+              <button type="submit" class="btn">Odblokuj</button>
+            {% endif %}
+          </form>
+        </td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

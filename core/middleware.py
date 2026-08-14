@@ -72,3 +72,53 @@ class LoginRateLimitMiddleware:
             return response
 
         return self.get_response(request)
+
+
+from datetime import datetime
+
+from django.utils import timezone
+
+
+class SessionTimeoutMiddleware:
+    """Automatyczne wylogowanie po okresie nieaktywności (RF-05)."""
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        if request.user.is_authenticated:
+            from django.conf import settings as dj_settings
+            from django.contrib import messages as dj_messages
+            from django.contrib.auth import logout as dj_logout
+
+            timeout = getattr(dj_settings, "SESSION_IDLE_TIMEOUT_SECONDS", 1800)
+            now = timezone.now()
+            last = request.session.get("last_activity")
+
+            if last:
+                try:
+                    last_dt = datetime.fromisoformat(last)
+                except ValueError:
+                    last_dt = now
+
+                if (now - last_dt).total_seconds() > timeout:
+                    dj_messages.info(request, "Sesja wygasła z powodu nieaktywności.")
+                    dj_logout(request)
+                    return self.get_response(request)
+
+            request.session["last_activity"] = now.isoformat()
+
+        return self.get_response(request)
+
+
+def get_client_ip(request):
+    """Zwraca adres IP klienta (X-Forwarded-For lub REMOTE_ADDR)."""
+
+    if request is None:
+        return None
+
+    forwarded = request.META.get("HTTP_X_FORWARDED_FOR")
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+
+    return request.META.get("REMOTE_ADDR")
