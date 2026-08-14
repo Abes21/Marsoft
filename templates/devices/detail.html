@@ -161,11 +161,55 @@
 
 <div class="card">
   <h2>Ostatnie logi</h2>
-  <p>Logi urządzenia zostaną dodane w kolejnym kroku.</p>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Czas</th>
+        <th>Poziom</th>
+        <th>Źródło</th>
+        <th>Treść</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for log in device.logs.all|slice:":10" %}
+        <tr>
+          <td>{{ log.event_time|date:"d.m.Y H:i:s" }}</td>
+          <td><span class="badge badge-{{ log.level }}">{{ log.get_level_display }}</span></td>
+          <td>{{ log.source }}</td>
+          <td><a href="{% url 'log_detail' log.pk %}">{{ log.message|truncatechars:60 }}</a></td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="4">Brak logów dla tego urządzenia.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
 </div>
 
 <div class="card">
   <h2>Powiązane alerty</h2>
-  <p>Alerty zostaną dodane w kolejnym kroku.</p>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Nazwa</th>
+        <th>Poziom</th>
+        <th>Data</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for alert in device.alerts.all|slice:":10" %}
+        <tr>
+          <td><a href="{% url 'alert_detail' alert.pk %}">{{ alert.name|truncatechars:60 }}</a></td>
+          <td><span class="badge badge-{{ alert.severity }}">{{ alert.get_severity_display }}</span></td>
+          <td>{{ alert.created_at|date:"d.m.Y H:i" }}</td>
+          <td><span class="badge badge-status-{{ alert.status }}">{{ alert.get_status_display }}</span></td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="4">Brak alertów dla tego urządzenia.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
 </div>
 {% endblock %}

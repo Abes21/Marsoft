@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -33,8 +34,16 @@ def alert_list(request):
         if form.cleaned_data.get("date_to"):
             qs = qs.filter(created_at__lte=form.cleaned_data["date_to"])
 
+    paginator = Paginator(qs, 50)
+    page_obj = paginator.get_page(request.GET.get("page"))
+
+    querystring = request.GET.copy()
+    querystring.pop("page", None)
+
     context = {
-        "alerts": qs,
+        "alerts": page_obj,
+        "page_obj": page_obj,
+        "base_qs": querystring.urlencode(),
         "filter_form": form,
         "devices": Device.objects.order_by("name"),
         "rules": SecurityRule.objects.order_by("name"),

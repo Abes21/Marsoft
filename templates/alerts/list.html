@@ -87,4 +87,16 @@
     {% endfor %}
   </tbody>
 </table>
+
+<div class="pagination">
+  {% if page_obj.has_previous %}
+    <a class="btn" href="?{{ base_qs }}&page={{ page_obj.previous_page_number }}">Poprzednia</a>
+  {% endif %}
+
+  <span>Strona {{ page_obj.number }} z {{ page_obj.paginator.num_pages }} ({{ page_obj.paginator.count }} alertów)</span>
+
+  {% if page_obj.has_next %}
+    <a class="btn" href="?{{ base_qs }}&page={{ page_obj.next_page_number }}">Następna</a>
+  {% endif %}
+</div>
 {% endblock %}
