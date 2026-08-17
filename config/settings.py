@@ -29,7 +29,7 @@ SECRET_KEY = 'django-insecure-9$ro6$2!22$idby&jrdm8rm%b747--b=ssp+ymyh1sp5=-(-(i
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.ngrok-free.app', '.ngrok.io']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.ngrok-free.app', '.ngrok-free.dev', '.ngrok.io', '.ngrok.dev']
 
 
 # Application definition
@@ -164,3 +164,5 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
 COMMAND_FAILURE_RATE = 0.0
 API_LOGS_KEY = os.environ.get("API_LOGS_KEY", "")
 SESSION_IDLE_TIMEOUT_SECONDS = int(os.environ.get("SESSION_IDLE_TIMEOUT_SECONDS", "1800"))
+
+CSRF_TRUSTED_ORIGINS = ['https://*.ngrok-free.app', 'https://*.ngrok-free.dev', 'https://*.ngrok.io', 'https://*.ngrok.dev']
