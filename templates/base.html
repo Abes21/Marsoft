@@ -4,65 +4,124 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% block title %}Panel monitorowania IT{% endblock %}</title>
-  <script src="{% static 'js/theme.js' %}"></script>
+  <title>{% block title %}Panel Monitorowania IT{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
   <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body>
-  <header class="topbar">
-    <div class="brand">Panel monitorowania IT</div>
-
-    <nav class="nav">
-      {% if user.is_authenticated %}
-        <a href="{% url 'dashboard' %}">Dashboard</a>
-        <a href="{% url 'devices' %}">Urządzenia</a>
-        {% if user.is_admin_role %}
-          <a href="{% url 'device_scan' %}">Skanuj sieć</a>
-        {% endif %}
-        <a href="{% url 'logs' %}">Logi</a>
-        <a href="{% url 'alerts' %}">Alerty</a>
-        <a href="{% url 'notifications' %}">
-          Powiadomienia
-          {% if unread_notifications_count > 0 %}
-            <span class="badge badge-danger">{{ unread_notifications_count }}</span>
-          {% endif %}
+  {% if user.is_authenticated %}
+  <div class="app-container">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <a href="{% url 'dashboard' %}" class="sidebar-brand">
+          <i data-lucide="monitor" style="color: var(--primary);"></i>
+          <span>IT Monitor</span>
         </a>
-        {% if user.is_admin_role %}
-          <a href="{% url 'rules' %}">Reguły</a>
-          <a href="{% url 'audit' %}">Działania</a>
-          <a href="{% url 'users' %}">Konta</a>
-          <a href="{% url 'settings' %}">Ustawienia</a>
-        {% endif %}
-      {% endif %}
-    </nav>
-
-    <div class="userbox">
-      {% if user.is_authenticated %}
-        <select id="theme-select" aria-label="Motyw wyglądu">
-          <option value="light">Jasny</option>
-          <option value="dark">Ciemny</option>
-          <option value="system">Systemowy</option>
-        </select>
-        <span>{{ user.username }} ({{ user.get_role_display }})</span>
-        <a href="{% url 'password_change' %}">Zmień hasło</a>
-        <form method="post" action="{% url 'logout' %}" style="display:inline;">
-          {% csrf_token %}
-          <button type="submit">Wyloguj</button>
-        </form>
-      {% endif %}
-    </div>
-  </header>
-
-  <main class="content">
-    {% if messages %}
-      <div class="messages">
-        {% for message in messages %}
-          <div class="message {{ message.tags }}">{{ message }}</div>
-        {% endfor %}
       </div>
-    {% endif %}
-
-    {% block content %}{% endblock %}
-  </main>
+      
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <div class="nav-section-title">Główne</div>
+          <a href="{% url 'dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+            <i data-lucide="layout-dashboard"></i>
+            <span>Dashboard</span>
+          </a>
+          <a href="{% url 'devices' %}" class="nav-link {% if 'device' in request.resolver_match.url_name %}active{% endif %}">
+            <i data-lucide="server"></i>
+            <span>Urządzenia</span>
+          </a>
+        </div>
+        
+        <div class="nav-section">
+          <div class="nav-section-title">Monitoring</div>
+          <a href="{% url 'logs' %}" class="nav-link {% if 'log' in request.resolver_match.url_name %}active{% endif %}">
+            <i data-lucide="file-text"></i>
+            <span>Logi</span>
+            {% if unread_notifications_count %}
+              <span class="badge badge-danger" style="margin-left: auto;">{{ unread_notifications_count }}</span>
+            {% endif %}
+          </a>
+          <a href="{% url 'alerts' %}" class="nav-link {% if 'alert' in request.resolver_match.url_name %}active{% endif %}">
+            <i data-lucide="bell"></i>
+            <span>Alerty</span>
+          </a>
+        </div>
+        
+        {% if user.is_admin_role %}
+        <div class="nav-section">
+          <div class="nav-section-title">Administracja</div>
+          <a href="{% url 'device_scan' %}" class="nav-link {% if 'scan' in request.resolver_match.url_name %}active{% endif %}">
+            <i data-lucide="scan"></i>
+            <span>Skanuj sieć</span>
+          </a>
+          <a href="{% url 'rules' %}" class="nav-link {% if request.resolver_match.url_name == 'rules' %}active{% endif %}">
+            <i data-lucide="shield"></i>
+            <span>Reguły</span>
+          </a>
+          <a href="{% url 'users' %}" class="nav-link {% if 'user' in request.resolver_match.url_name %}active{% endif %}">
+            <i data-lucide="users"></i>
+            <span>Konta</span>
+          </a>
+          <a href="{% url 'audit' %}" class="nav-link {% if request.resolver_match.url_name == 'audit' %}active{% endif %}">
+            <i data-lucide="activity"></i>
+            <span>Działania</span>
+          </a>
+        </div>
+        {% endif %}
+        
+        <div class="nav-section">
+          <div class="nav-section-title">Ustawienia</div>
+          <a href="{% url 'password_change' %}" class="nav-link">
+            <i data-lucide="lock"></i>
+            <span>Zmień hasło</span>
+          </a>
+        </div>
+      </nav>
+    </aside>
+    
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+      <div class="topbar">
+        <h1 class="page-title">{% block page_title %}Dashboard{% endblock %}</h1>
+        <div class="user-menu">
+          <div class="user-avatar">
+            {{ user.username|first|upper }}
+          </div>
+          <div>
+            <div style="font-weight: 600;">{{ user.username }}</div>
+            <div style="font-size: 0.75rem; color: var(--text-secondary);">{{ user.get_role_display }}</div>
+          </div>
+          <form method="post" action="{% url 'logout' %}" style="display: inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-secondary" style="margin-left: 1rem;">
+              <i data-lucide="log-out" style="width: 16px; height: 16px;"></i>
+              Wyloguj
+            </button>
+          </form>
+        </div>
+      </div>
+      
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+      
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+  {% else %}
+    {% block login_content %}{% endblock %}
+  {% endif %}
+  
+  <script>
+    lucide.createIcons();
+  </script>
+  {% block extra_js %}{% endblock %}
 </body>
 </html>

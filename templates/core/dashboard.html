@@ -1,72 +1,51 @@
 {% extends "base.html" %}
 
-{% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
 
 {% block content %}
-<h1>Dashboard</h1>
-
-<h2>Infrastruktura</h2>
+<!-- STATYSTYKI -->
 <div class="stats-grid">
   <div class="stat-card">
-    <span class="stat-value">{{ devices_total }}</span>
-    <span class="stat-label">Wszystkie urządzenia</span>
+    <div class="stat-value">{{ devices_total }}</div>
+    <div class="stat-label">Wszystkie urządzenia</div>
+    <div style="margin-top: 0.5rem; font-size: 0.875rem;">
+      <span class="badge badge-success">{{ devices_online }} online</span>
+      <span class="badge badge-danger" style="margin-left: 0.5rem;">{{ devices_offline }} offline</span>
+    </div>
   </div>
+  
   <div class="stat-card">
-    <span class="stat-value stat-ok">{{ devices_online }}</span>
-    <span class="stat-label">Aktywne (online)</span>
+    <div class="stat-value" style="color: var(--warning);">{{ alerts_new }}</div>
+    <div class="stat-label">Nowe alerty</div>
+    <div style="margin-top: 0.5rem; font-size: 0.875rem;">
+      <span class="badge badge-info">{{ alerts_unresolved }} nierozwiązanych</span>
+    </div>
   </div>
+  
   <div class="stat-card">
-    <span class="stat-value stat-bad">{{ devices_offline }}</span>
-    <span class="stat-label">Niedostępne</span>
+    <div class="stat-value" style="color: var(--danger);">{{ alerts_critical }}</div>
+    <div class="stat-label">Alerty krytyczne</div>
+    <div style="margin-top: 0.5rem; font-size: 0.875rem;">
+      <span class="text-muted">Wymagają uwagi</span>
+    </div>
   </div>
+  
   <div class="stat-card">
-    <span class="stat-value">{{ devices_unknown }}</span>
-    <span class="stat-label">Nieznany status</span>
-  </div>
-  <div class="stat-card">
-    <span class="stat-value stat-warn">{{ devices_disconnected }}</span>
-    <span class="stat-label">Odłączone administracyjnie</span>
+    <div class="stat-value" style="color: var(--info);">{{ devices_disconnected }}</div>
+    <div class="stat-label">Odłączone od sieci</div>
+    <div style="margin-top: 0.5rem; font-size: 0.875rem;">
+      <span class="text-muted">Administracyjnie</span>
+    </div>
   </div>
 </div>
 
-<h2>Alerty</h2>
-<div class="stats-grid">
-  <div class="stat-card">
-    <span class="stat-value stat-warn">{{ alerts_new }}</span>
-    <span class="stat-label">Nowe alerty</span>
-  </div>
-  <div class="stat-card">
-    <span class="stat-value stat-warn">{{ alerts_unresolved }}</span>
-    <span class="stat-label">Nierozwiązane</span>
-  </div>
-  <div class="stat-card">
-    <span class="stat-value stat-bad">{{ alerts_critical }}</span>
-    <span class="stat-label">Krytyczne</span>
-  </div>
-</div>
-
-<div class="card">
-  <h2>Liczba zdarzeń — ostatnie 7 dni</h2>
-
-  <div class="chart" role="img" aria-label="Wykres liczby zdarzeń z ostatnich 7 dni">
-    {% for d in chart_data %}
-      <div class="chart-col">
-        <div
-          class="chart-bar"
-          style="height: {% widthratio d.count max_count 140 %}px;"
-          title="{{ d.label }}: {{ d.count }}"
-        ></div>
-        <span class="chart-value">{{ d.count }}</span>
-        <span class="chart-label">{{ d.label }}</span>
-      </div>
-    {% endfor %}
-  </div>
-</div>
-
-<div class="dashboard-columns">
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem;">
+  <!-- OSTATNIE ZDARZENIA -->
   <div class="card">
-    <h2>Ostatnie zdarzenia</h2>
-
+    <div class="card-header">
+      <h2 class="card-title">Ostatnie zdarzenia</h2>
+      <a href="{% url 'logs' %}" class="btn btn-secondary">Zobacz wszystkie</a>
+    </div>
     <table class="table">
       <thead>
         <tr>
@@ -79,47 +58,53 @@
       <tbody>
         {% for log in recent_logs %}
           <tr>
-            <td>{{ log.event_time|date:"d.m.Y H:i:s" }}</td>
-            <td><span class="badge badge-{{ log.level }}">{{ log.get_level_display }}</span></td>
+            <td>{{ log.event_time|date:"d.m.Y H:i" }}</td>
+            <td>
+              {% if log.level == 'critical' %}
+                <span class="badge badge-danger">Krytyczny</span>
+              {% elif log.level == 'error' %}
+                <span class="badge badge-danger">Błąd</span>
+              {% elif log.level == 'warning' %}
+                <span class="badge badge-warning">Ostrzeżenie</span>
+              {% else %}
+                <span class="badge badge-info">Info</span>
+              {% endif %}
+            </td>
             <td>{{ log.source }}</td>
-            <td><a href="{% url 'log_detail' log.pk %}">{{ log.message|truncatechars:60 }}</a></td>
+            <td>{{ log.message|truncatechars:50 }}</td>
           </tr>
         {% empty %}
-          <tr><td colspan="4">Brak zdarzeń.</td></tr>
+          <tr>
+            <td colspan="4" class="text-muted">Brak zdarzeń</td>
+          </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
-
+  
+  <!-- OSTATNIE ALERTY -->
   <div class="card">
-    <h2>Ostatnie alerty</h2>
-
-    <table class="table">
-      <thead>
-        <tr>
-          <th>Nazwa</th>
-          <th>Poziom</th>
-          <th>Urządzenie</th>
-          <th>Data</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for alert in recent_alerts %}
-          <tr>
-            <td><a href="{% url 'alert_detail' alert.pk %}">{{ alert.name|truncatechars:40 }}</a></td>
-            <td><span class="badge badge-{{ alert.severity }}">{{ alert.get_severity_display }}</span></td>
-            <td>
-              {% if alert.device %}{{ alert.device.name }}{% else %}-{% endif %}
-            </td>
-            <td>{{ alert.created_at|date:"d.m.Y H:i" }}</td>
-            <td><span class="badge badge-status-{{ alert.status }}">{{ alert.get_status_display }}</span></td>
-          </tr>
-        {% empty %}
-          <tr><td colspan="5">Brak alertów.</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
+    <div class="card-header">
+      <h2 class="card-title">Ostatnie alerty</h2>
+      <a href="{% url 'alerts' %}" class="btn btn-secondary">Wszystkie</a>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+      {% for alert in recent_alerts %}
+        <div class="card" style="padding: 1rem; border-left: 3px solid {% if alert.severity == 'critical' %}var(--danger){% elif alert.severity == 'high' %}var(--warning){% else %}var(--info){% endif %};">
+          <div style="font-weight: 600; margin-bottom: 0.25rem;">{{ alert.name|truncatechars:40 }}</div>
+          <div style="font-size: 0.875rem; color: var(--text-secondary);">
+            {{ alert.created_at|date:"d.m.Y H:i" }}
+          </div>
+          <div style="margin-top: 0.5rem;">
+            <span class="badge badge-{{ alert.status }}">
+              {{ alert.get_status_display }}
+            </span>
+          </div>
+        </div>
+      {% empty %}
+        <div class="text-muted">Brak alertów</div>
+      {% endfor %}
+    </div>
   </div>
 </div>
 {% endblock %}

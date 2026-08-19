@@ -1,24 +1,88 @@
-{% extends 'base.html' %}
-{% block title %}Logowanie{% endblock %}
-{% block content %}
-  <div style="max-width: 380px; margin: 60px auto;">
-    <h1>Zaloguj się</h1>
+{% extends "base.html" %}
+{% load static %}
 
-    {% if form.errors %}
-      <p style="color:#b00020;">Nieprawidłowy login lub hasło.</p>
-    {% endif %}
-
-    <form method="post">
-      {% csrf_token %}
-      <p>
-        <label for="id_username">Login</label><br>
-        <input type="text" name="username" id="id_username" required autofocus>
-      </p>
-      <p>
-        <label for="id_password">Hasło</label><br>
-        <input type="password" name="password" id="id_password" required>
-      </p>
-      <button type="submit">Zaloguj</button>
-    </form>
+{% block login_content %}
+<div class="login-container">
+  <div class="login-sidebar">
+    <div class="login-brand" style="display: flex; align-items: center; gap: 1rem;">
+      <i data-lucide="monitor" style="width: 48px; height: 48px; color: var(--primary);"></i>
+      <span>IT Monitor</span>
+    </div>
+    <h1 style="font-size: 2.5rem; margin-bottom: 1rem; line-height: 1.2;">
+      Kompleksowe zarządzanie<br>
+      <span style="color: var(--primary);">Twoją infrastrukturą</span>
+    </h1>
+    <p style="color: var(--text-secondary); font-size: 1.125rem; max-width: 500px;">
+      Platforma do monitorowania urządzeń, analizy logów i zarządzania alertami bezpieczeństwa. Wszystko w jednym systemie.
+    </p>
+    
+    <div style="margin-top: 3rem; display: grid; gap: 1.5rem;">
+      <div style="display: flex; gap: 1rem; align-items: flex-start;">
+        <div style="width: 48px; height: 48px; background: var(--bg-card); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+          <i data-lucide="server" style="color: var(--primary);"></i>
+        </div>
+        <div>
+          <h3 style="margin-bottom: 0.25rem;">Monitorowanie urządzeń</h3>
+          <p style="color: var(--text-secondary); font-size: 0.875rem;">Śledź dostępność i stan całej infrastruktury IT</p>
+        </div>
+      </div>
+      
+      <div style="display: flex; gap: 1rem; align-items: flex-start;">
+        <div style="width: 48px; height: 48px; background: var(--bg-card); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+          <i data-lucide="shield" style="color: var(--primary);"></i>
+        </div>
+        <div>
+          <h3 style="margin-bottom: 0.25rem;">Bezpieczeństwo</h3>
+          <p style="color: var(--text-secondary); font-size: 0.875rem;">Automatyczne wykrywanie zagrożeń i alertów</p>
+        </div>
+      </div>
+      
+      <div style="display: flex; gap: 1rem; align-items: flex-start;">
+        <div style="width: 48px; height: 48px; background: var(--bg-card); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+          <i data-lucide="activity" style="color: var(--primary);"></i>
+        </div>
+        <div>
+          <h3 style="margin-bottom: 0.25rem;">Analiza logów</h3>
+          <p style="color: var(--text-secondary); font-size: 0.875rem;">Centralne zbieranie i przeszukiwanie zdarzeń</p>
+        </div>
+      </div>
+    </div>
   </div>
+  
+  <div class="login-content">
+    <div class="login-box">
+      <h2 class="login-title">Witaj ponownie</h2>
+      <p class="login-subtitle">Zaloguj się do systemu</p>
+      
+      {% if form.errors %}
+        <div class="alert alert-danger">
+          Nieprawidłowa nazwa użytkownika lub hasło.
+        </div>
+      {% endif %}
+      
+      <form method="post">
+        {% csrf_token %}
+        
+        <div class="form-group">
+          <label class="form-label">Login</label>
+          <input type="text" name="username" class="form-input" placeholder="Wprowadź login" required autofocus>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Hasło</label>
+          <input type="password" name="password" class="form-input" placeholder="Wprowadź hasło" required>
+        </div>
+        
+        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.875rem;">
+          <i data-lucide="log-in"></i>
+          Zaloguj się
+        </button>
+      </form>
+      
+      <p style="margin-top: 2rem; text-align: center; color: var(--text-secondary); font-size: 0.875rem;">
+        Dostęp do systemu nadaje administrator organizacji.
+      </p>
+    </div>
+  </div>
+</div>
 {% endblock %}

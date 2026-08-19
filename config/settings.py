@@ -156,8 +156,8 @@ USE_I18N = True
 USE_TZ = True
 
 # Pliki statyczne
-STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Demonstracyjny mechanizm wykonawczy poleceń administracyjnych.
 # Wartość od 0.0 do 1.0 określa prawdopodobieństwo symulowanego niepowodzenia.
