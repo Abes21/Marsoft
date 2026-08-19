@@ -1,25 +1,31 @@
 {% extends "base.html" %}
 
-{% block title %}{{ title }}{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
 
 {% block content %}
-<h1>{{ title }}</h1>
+<div class="card" style="max-width: 600px;">
+  <form method="post">
+    {% csrf_token %}
 
-<form method="post" class="card">
-  {% csrf_token %}
+    {% if form.non_field_errors %}
+      <div class="message error">
+        {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+      </div>
+    {% endif %}
 
-  {{ form.non_field_errors }}
+    {% for field in form %}
+      <div class="form-field">
+        <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% if field.help_text %}<small class="help-text">{{ field.help_text }}</small>{% endif %}
+        {% if field.errors %}<div class="field-error">{{ field.errors.0 }}</div>{% endif %}
+      </div>
+    {% endfor %}
 
-  {% for field in form %}
-    <div class="form-field">
-      {{ field.label_tag }}
-      {{ field }}
-      {% if field.help_text %}<small class="help-text">{{ field.help_text }}</small>{% endif %}
-      {{ field.errors }}
+    <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem;">
+      <button type="submit" class="btn btn-primary">Zapisz</button>
+      <a href="{% url 'users' %}" class="btn btn-secondary">Anuluj</a>
     </div>
-  {% endfor %}
-
-  <button type="submit" class="btn btn-primary">Zapisz</button>
-  <a class="btn btn-secondary" href="{% url 'users' %}">Anuluj</a>
-</form>
+  </form>
+</div>
 {% endblock %}

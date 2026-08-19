@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block page_title %}Szczegóły logu{% endblock %}
+
+{% block content %}
+<div class="card">
+  <dl class="detail-list">
+    <dt>Czas zdarzenia</dt>
+    <dd>{{ log.event_time|date:"d.m.Y H:i:s" }}</dd>
+
+    <dt>Czas odbioru</dt>
+    <dd>{{ log.received_time|date:"d.m.Y H:i:s" }}</dd>
+
+    <dt>Poziom</dt>
+    <dd><span class="badge badge-{{ log.level }}">{{ log.get_level_display }}</span></dd>
+
+    <dt>Źródło</dt>
+    <dd>{{ log.source }}</dd>
+
+    <dt>Typ zdarzenia</dt>
+    <dd>{{ log.event_type }}</dd>
+
+    <dt>Użytkownik</dt>
+    <dd>{{ log.user|default:"-" }}</dd>
+
+    <dt>Urządzenie</dt>
+    <dd>{% if log.device %}<a href="{% url 'device_detail' log.device.pk %}">{{ log.device.name }}</a> ({{ log.device.ip_address }}){% else %}-{% endif %}</dd>
+
+    <dt>Treść</dt>
+    <dd style="grid-column: 2; background: var(--bg-darker); padding: 1rem; border-radius: 8px; border: 1px solid var(--border);">{{ log.message }}</dd>
+
+    {% if log.raw_data %}
+    <dt>Dane dodatkowe (JSON)</dt>
+    <dd style="grid-column: 2;">
+      <pre style="background: var(--bg-darker); padding: 1rem; border-radius: 8px; border: 1px solid var(--border); overflow-x: auto; font-size: 0.875rem;">{{ raw_pretty }}</pre>
+    </dd>
+    {% endif %}
+  </dl>
+</div>
+
+<a href="{% url 'logs' %}" class="btn btn-secondary">← Wróć do listy logów</a>
+{% endblock %}

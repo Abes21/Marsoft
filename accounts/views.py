@@ -4,6 +4,7 @@ from django.shortcuts import render
 
 
 from .decorators import admin_required
+from .models import User
 from .forms import AdminUserCreateForm, AdminUserEditForm
 
 

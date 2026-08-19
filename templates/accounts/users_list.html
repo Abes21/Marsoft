@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 
-{% block title %}Konta użytkowników{% endblock %}
+{% block page_title %}Konta użytkowników{% endblock %}
 
 {% block content %}
-<div class="page-header">
-  <h1>Konta użytkowników</h1>
-  <a class="btn btn-primary" href="{% url 'user_add' %}">Dodaj użytkownika</a>
+<div class="page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+  <h1 style="margin: 0;">Zarządzanie kontami</h1>
+  <a href="{% url 'user_add' %}" class="btn btn-primary">+ Dodaj użytkownika</a>
 </div>
 
 <table class="table">
@@ -17,34 +17,33 @@
       <th>Rola</th>
       <th>Status</th>
       <th>Ostatnie logowanie</th>
-      <th>Akcje</th>
+      <th style="text-align: right;">Akcje</th>
     </tr>
   </thead>
   <tbody>
     {% for u in users %}
       <tr>
-        <td>{{ u.username }}</td>
+        <td><strong>{{ u.username }}</strong></td>
         <td>{{ u.get_full_name|default:"-" }}</td>
         <td>{{ u.email|default:"-" }}</td>
-        <td>{{ u.get_role_display }}</td>
+        <td><span class="badge badge-info">{{ u.get_role_display }}</span></td>
         <td>
           {% if u.is_active %}
-            <span class="badge badge-status-resolved">Aktywne</span>
+            <span class="badge badge-success">Aktywne</span>
           {% else %}
-            <span class="badge badge-error">Zablokowane</span>
+            <span class="badge badge-danger">Zablokowane</span>
           {% endif %}
         </td>
-        <td>{{ u.last_login|date:"d.m.Y H:i"|default:"nigdy" }}</td>
-        <td>
-          <a class="btn" href="{% url 'user_edit' u.pk %}">Edytuj</a>
-          <a class="btn" href="{% url 'user_set_password' u.pk %}">Hasło</a>
-
+        <td class="text-secondary">{{ u.last_login|date:"d.m.Y H:i"|default:"nigdy" }}</td>
+        <td style="text-align: right; display: flex; gap: 0.5rem; justify-content: flex-end;">
+          <a class="btn btn-secondary" href="{% url 'user_edit' u.pk %}">Edytuj</a>
+          <a class="btn btn-secondary" href="{% url 'user_set_password' u.pk %}">Hasło</a>
           <form method="post" action="{% url 'user_toggle' u.pk %}" style="display:inline;">
             {% csrf_token %}
             {% if u.is_active %}
               <button type="submit" class="btn btn-danger">Zablokuj</button>
             {% else %}
-              <button type="submit" class="btn">Odblokuj</button>
+              <button type="submit" class="btn btn-primary">Odblokuj</button>
             {% endif %}
           </form>
         </td>
