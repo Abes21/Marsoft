@@ -35,17 +35,20 @@
           {% endif %}
         </td>
         <td class="text-secondary">{{ u.last_login|date:"d.m.Y H:i"|default:"nigdy" }}</td>
-        <td style="text-align: right; display: flex; gap: 0.5rem; justify-content: flex-end;">
-          <a class="btn btn-secondary" href="{% url 'user_edit' u.pk %}">Edytuj</a>
-          <a class="btn btn-secondary" href="{% url 'user_set_password' u.pk %}">Hasło</a>
-          <form method="post" action="{% url 'user_toggle' u.pk %}" style="display:inline;">
-            {% csrf_token %}
-            {% if u.is_active %}
-              <button type="submit" class="btn btn-danger">Zablokuj</button>
-            {% else %}
-              <button type="submit" class="btn btn-primary">Odblokuj</button>
-            {% endif %}
-          </form>
+        <td style="text-align: right;">
+          <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+            <a class="btn btn-secondary" href="{% url 'user_edit' u.pk %}">Edytuj</a>
+            <a class="btn btn-secondary" href="{% url 'user_set_password' u.pk %}">Hasło</a>
+            <a class="btn btn-danger" href="{% url 'user_delete' u.pk %}">Usuń</a>
+            <form method="post" action="{% url 'user_toggle' u.pk %}" style="display:inline;">
+              {% csrf_token %}
+              {% if u.is_active %}
+                <button type="submit" class="btn btn-danger">Zablokuj</button>
+              {% else %}
+                <button type="submit" class="btn btn-primary">Odblokuj</button>
+              {% endif %}
+            </form>
+          </div>
         </td>
       </tr>
     {% endfor %}

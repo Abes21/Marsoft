@@ -468,3 +468,22 @@ body {
 .mt-1 { margin-top: 0.5rem; }
 .mt-2 { margin-top: 1rem; }
 .mt-3 { margin-top: 1.5rem; }
+
+
+/* Czerwone przyciski - wysoka specyficzność */
+.btn.btn-danger,
+button.btn-danger,
+a.btn-danger {
+  background: #ef4444 !important;
+  color: white !important;
+  border: 1px solid #ef4444 !important;
+  text-decoration: none !important;
+}
+
+.btn.btn-danger:hover,
+button.btn-danger:hover,
+a.btn-danger:hover {
+  background: #dc2626 !important;
+  color: white !important;
+  text-decoration: none !important;
+}

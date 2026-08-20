@@ -100,3 +100,26 @@ def user_set_password(request, pk):
         "accounts/user_password.html",
         {"form": form, "target": user},
     )
+
+@admin_required
+def user_delete(request, pk):
+    """Usunięcie konta - tylko administrator (RF-06)."""
+    
+    target = get_object_or_404(User, pk=pk)
+    
+    if target == request.user:
+        messages.error(request, "Nie możesz usunąć własnego konta.")
+        return redirect("users")
+    
+    if request.method == "POST":
+        username = target.username
+        target.delete()
+        log_action("user_updated", f"Usunięto konto „{username}”")
+        messages.success(request, f"Usunięto konto {username}.")
+        return redirect("users")
+    
+    return render(
+        request,
+        "accounts/user_confirm_delete.html",
+        {"target": target},
+    )

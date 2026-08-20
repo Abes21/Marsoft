@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block page_title %}Usuń konto: {{ target.username }}{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 600px; border-left: 4px solid var(--danger);">
+  <div style="margin-bottom: 1.5rem;">
+    <h2 style="color: var(--danger); margin-bottom: 1rem;">
+      <i data-lucide="alert-triangle" style="display: inline; vertical-align: middle;"></i>
+      Potwierdź usunięcie konta
+    </h2>
+    
+    <div class="message error" style="margin-bottom: 1.5rem;">
+      Ta operacja jest nieodwracalna. Wszystkie dane powiązane z tym kontem zostaną usunięte.
+    </div>
+    
+    <p style="margin-bottom: 1.5rem; font-size: 1.125rem;">
+      Czy na pewno chcesz usunąć konto <strong>{{ target.username }}</strong>?
+    </p>
+    
+    <dl class="detail-list" style="background: var(--bg-darker); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;">
+      <dt>Login</dt>
+      <dd>{{ target.username }}</dd>
+      
+      <dt>E-mail</dt>
+      <dd>{{ target.email|default:"-" }}</dd>
+      
+      <dt>Rola</dt>
+      <dd>{{ target.get_role_display }}</dd>
+      
+      <dt>Ostatnie logowanie</dt>
+      <dd>{{ target.last_login|date:"d.m.Y H:i"|default:"nigdy" }}</dd>
+    </dl>
+    
+    <form method="post">
+      {% csrf_token %}
+      <div style="display: flex; gap: 0.75rem;">
+        <button type="submit" class="btn btn-danger">
+          <i data-lucide="trash-2"></i>
+          Tak, usuń konto
+        </button>
+        <a href="{% url 'users' %}" class="btn btn-secondary">
+          Anuluj
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
